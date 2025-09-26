@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeweType Fast!</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        /* ================================================= */
+        /* === Variabel dan Gaya Dasar (Tema Gelap) === */
+        /* ================================================= */
+        :root {
+            /* Komen: Variabel untuk Mode Gelap */
+            --bg-primary: #121212; 
+            --bg-card: rgba(255, 255, 255, 0.05); 
+            --text-main: #c9c9c9; 
+            --text-subtle: #a0a0a0; 
+            --accent-1: #1a8075; /* Hijau Kebiruan */
+            --accent-2: #e55a29; /* Oranye/Merah Tua */
+            --border-color: rgba(255, 255, 255, 0.1); 
+            --shadow-heavy: rgba(0, 0, 0, 0.4);
+
+            --card-br: 12px; 
+            --transition-speed: 0.5s;
+            
+            /* Komen: Warna khusus game mengetik */
+            --color-correct: var(--accent-1); 
+            --color-wrong: #F44336; 
+            --color-cursor: #61dafb; /* Biru muda - warna utama kursor/highlight */
+        }
+
+        /* Komen: Reset properti dasar untuk semua elemen */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Komen: Properti dasar body dan layout utama */
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            background-color: var(--bg-primary);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            padding: 20px;
+        }
+
+        /* Komen: Efek latar belakang - Dibiarkan sama */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle 800px at 15% 15%, #222 0%, #121212 40%, transparent 60%) no-repeat,
+                        radial-gradient(circle 600px at 85% 20%, #333 0%, transparent 60%) no-repeat,
+                        radial-gradient(circle 700px at 40% 85%, #222 0%, transparent 60%) no-repeat;
+            opacity: 0.8;
+            z-index: -2;
+            animation: pulseBg 15s infinite ease-in-out alternate;
+            transition: opacity var(--transition-speed);
+        }
+
+        /* Komen: Efek garis-garis halus di latar belakang - Dibiarkan sama */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(to right, var(--border-color) 0 1px, transparent 1px 24px),
+                        repeating-linear-gradient(to bottom, var(--border-color) 0 1px, transparent 1px 24px);
+            z-index: -1;
+            mask-image: radial-gradient(1200px 700px at 50% 40%, #000 0%, transparent 75%);
+            opacity: 0.5;
+            transition: background var(--transition-speed);
+        }
+        
+        /* Komen: Animasi pulseBg - Dibiarkan sama */
+        @keyframes pulseBg {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+
+        /* ================================================= */
+        /* === Gaya Kontainer Game (Main Card) === */
+        /* ================================================= */
+        .container {
+            /* Komen: Gaya Main Card (Glassmorphism) */
+            background-color: var(--bg-card);
+            border-radius: var(--card-br);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px 0 var(--shadow-heavy);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            
+            /* Komen: Penyesuaian Lebar Kontainer */
+            width: 90%;
+            max-width: 850px; 
+            
+            padding: 30px;
+            text-align: center;
+            max-height: 90vh; 
+            display: flex;
+            flex-direction: column;
+            gap: 15px; 
+        }
+
+        /* Komen: Judul game - Dibiarkan sama */
+        h1 {
+            color: var(--accent-2); 
+            margin-bottom: 5px; 
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+        }
+        
+        /* Komen: Area statistik - Dibiarkan sama */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px;
+            background-color: rgba(0, 0, 0, 0.2); 
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-item {
+            font-size: 0.9em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px; 
+            color: var(--text-subtle);
+        }
+
+        .stat-item span {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--color-cursor); 
+        }
+
+        /* Komen: Kontainer khusus untuk kontrol waktu - Dibiarkan sama */
+        .time-control-group {
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             gap: 8px; 
+             height: 30px; 
+             margin-top: 5px;
+        }
+        
+        /* Komen: Styling untuk tombol pilihan waktu - Dibiarkan sama */
+        .time-select-btn {
+            width: 35px; 
+            height: 30px;
+            background-color: transparent;
+            color: var(--text-subtle); 
+            border: 1px solid var(--text-subtle); 
+            font-size: 0.9em;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0; 
+        }
+
+        .time-select-btn:hover {
+            color: var(--accent-1);
+            border-color: var(--accent-1);
+        }
+
+        /* Komen: Status aktif pada tombol waktu - Dibiarkan sama */
+        .time-select-btn.active {
+            color: var(--color-cursor); 
+            border-color: var(--color-cursor);
+            font-weight: 700;
+        }
+        
+        /* Komen: Gaya untuk tampilan hitungan mundur aktif (counting) - Dibiarkan sama */
+        .time-select-btn.active.counting {
+            color: #f7f7f7; 
+            font-size: 1.1em; 
+            font-weight: 700;
+            border-color: #f7f7f7;
+        }
+        
+
+        /* ================================================= */
+        /* === Area Teks Target (Quote Container) === */
+        /* ================================================= */
+        .quote-container {
+            /* Komen: Gaya Quote Container - Dibiarkan sama */
+            font-family: 'JetBrains Mono', monospace; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            min-height: 120px;
+            flex-grow: 1; 
+            margin-bottom: 5px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            text-align: left;
+            font-size: 1.1em; 
+            line-height: 1.7;
+            letter-spacing: 0.05em;
+            user-select: none; 
+            cursor: text; 
+        }
+
+        /* Komen: Scrollbar untuk Quote Container - Dibiarkan sama */
+        .quote-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .quote-container::-webkit-scrollbar-thumb {
+            background-color: var(--accent-1);
+            border-radius: 4px;
+        }
+        .quote-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        /* Komen: Styling untuk setiap karakter - Dibiarkan sama */
+        .word-char {
+            opacity: 0.5; 
+            transition: opacity 0.1s, color 0.1s, background-color 0.1s;
+        }
+
+        /* Komen: Karakter yang benar - Dibiarkan sama */
+        .correct {
+            color: var(--color-correct);
+            opacity: 1;
+        }
+
+        /* Komen: Karakter yang salah - Dibiarkan sama */
+        .wrong {
+            color: var(--color-wrong);
+            background-color: rgba(244, 67, 54, 0.15); 
+            opacity: 1;
+            border-bottom: none;
+        }
+
+        /* Komen: Karakter yang sedang aktif (kursor) - Dibiarkan sama */
+        .active {
+            opacity: 1;
+            border-bottom: 2px solid var(--color-cursor);
+            animation: blink-cursor 0.7s infinite;
+        }
+        
+        /* Komen: Animasi kursor berkedip - Dibiarkan sama */
+        @keyframes blink-cursor {
+            0% {
+                border-color: var(--color-cursor);
+            }
+            50% {
+                border-color: transparent;
+            }
+            100% {
+                border-color: var(--color-cursor);
+            }
+        }
+
+        /* Komen: Area input teks tersembunyi - Dibiarkan sama */
+        .input-area {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            opacity: 0; 
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: 0;
+            border: none;
+            z-index: -1; 
+        }
+        
+        /* ================================================= */
+        /* === Area Input Kustom & Tombol Aksi === */
+        /* ================================================= */
+        .custom-input-area {
+            margin-top: 10px; 
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        /* Komen: Kolom Input Kustom - Dibiarkan sama */
+        #custom-text-input {
+            width: 100%;
+            min-height: 70px; 
+            padding: 12px; 
+            font-size: 0.9em; 
+            line-height: 1.6;
+            letter-spacing: 0.05em;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: var(--text-main);
+            outline: none;
+            resize: none; 
+            overflow-y: auto; 
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Komen: Kontainer untuk tombol Muat Kustom, Next, dan Layar Penuh */
+        .action-buttons {
+            /* Komen: Mengatur tata letak horizontal dan sejajar di kanan */
+            display: flex;
+            justify-content: flex-end; 
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap; 
+        }
+        
+        /* Komen: Gaya umum untuk semua tombol aksi (Muat Kustom, Next, Layar Penuh) */
+        .action-button {
+            /* Komen: Memastikan tombol memiliki ukuran yang konsisten */
+            height: 40px; 
+            background-color: transparent;
+            color: var(--color-cursor); 
+            border: 1px solid var(--color-cursor); 
+            padding: 0 15px; 
+            font-size: 0.9em;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s; 
+            font-family: 'Poppins', sans-serif; 
+            flex-shrink: 0; 
+            display: flex;
+            align-items: center;
+            gap: 8px; 
+        }
+
+        .action-button:hover {
+            background-color: var(--color-cursor); 
+            color: var(--bg-primary); 
+        }
+        
+        /* ================================================= */
+        /* === Overlay Hasil Akhir & Input Nama === */
+        /* ================================================= */
+        .result-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Komen: Konten di dalam overlay hasil - Dibiarkan sama */
+        .result-content {
+            background-color: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--color-cursor);
+            padding: 40px;
+            border-radius: var(--card-br);
+            box-shadow: 0 0 30px rgba(97, 218, 251, 0.5); 
+            text-align: center;
+            max-width: 450px; 
+            width: 90%;
+        }
+
+        .result-content h2 {
+            color: var(--color-cursor);
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        /* Komen: Gaya Input Nama pada Hasil Akhir */
+        #name-input-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        #name-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        #name-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: rgba(0, 0, 0, 0.4);
+            color: var(--text-main);
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #name-input:focus {
+            border-color: var(--color-cursor);
+        }
+
+        .final-stat {
+            font-size: 1.1em;
+            margin: 12px 0;
+            color: var(--text-main);
+        }
+
+        .final-stat .stat-value { /* Komen: Kelas untuk angka dan nilai */
+            font-weight: 700;
+            color: var(--color-correct); 
+            font-size: 1.6em;
+            margin-left: 10px;
+        }
+        
+        .final-stat .stat-detail { /* Komen: Penyesuaian untuk tampilan detail waktu/kesalahan */
+             font-weight: 500;
+             color: var(--text-subtle);
+             font-size: 0.8em;
+             margin-left: 5px;
+        }
+
+        /* Komen: Kontainer Tombol Aksi Hasil Akhir */
+        .final-action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        /* Komen: Styling tombol "Coba Lagi" */
+        .restart-btn {
+            background-color: var(--accent-2);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(229, 90, 41, 0.4);
+            flex-grow: 1;
+            max-width: 200px;
+        }
+
+        .restart-btn:hover {
+            background-color: #ff743f;
+            transform: translateY(-2px);
+        }
+        
+        /* Komen: Styling tombol "Unduh Sertifikat" */
+        #download-cert-btn {
+             background-color: var(--accent-1); 
+             color: #fff;
+             border: none;
+             padding: 12px 25px;
+             font-size: 1em;
+             font-weight: 700;
+             border-radius: 8px;
+             cursor: pointer;
+             transition: background-color 0.3s, transform 0.2s;
+             box-shadow: 0 4px 15px rgba(26, 128, 117, 0.4);
+             flex-grow: 1;
+             max-width: 200px;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             gap: 8px;
+        }
+        
+        #download-cert-btn:hover {
+            background-color: #38b1a3;
+            transform: translateY(-2px);
+        }
+
+
+        /* ================================================= */
+        /* === Gaya Template Sertifikat (Revisi Ukuran Font agar tidak terpotong) === */
+        /* ================================================= */
+        #certificate-template {
+            /* Komen: Template sertifikat disembunyikan dan diatur ukurannya untuk PNG */
+            position: fixed;
+            top: -5000px; 
+            left: -5000px;
+            opacity: 0; 
+            width: 1200px; 
+            height: 800px; 
+            background-color: var(--bg-primary); 
+            color: var(--text-main);
+            padding: 60px;
+            border: none; 
+            box-shadow: none; 
+            z-index: -999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            /* Komen: Background gradient dekoratif */
+            background-image: linear-gradient(135deg, rgba(26, 128, 117, 0.2) 0%, rgba(18, 18, 18, 0) 50%, rgba(229, 90, 41, 0.1) 100%);
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        #certificate-template h3 {
+            font-size: 3.5em; /* Komen: DIKURANGI DARI 4em KE 3.5em agar lebih ringkas */
+            margin-bottom: 5px; 
+            color: var(--accent-2);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        /* Komen: Gaya untuk Nomor Sertifikat (posisi baru) */
+        #certificate-template .cert-number-display { 
+             font-size: 1.1em; /* Komen: DIKURANGI DARI 1.2em KE 1.1em */
+             color: var(--text-subtle); 
+             margin-bottom: 25px; /* Komen: Jarak yang disesuaikan */
+             font-weight: 500;
+        }
+        
+        #certificate-template p {
+            font-size: 1.3em; /* Komen: DIKURANGI DARI 1.5em KE 1.3em */
+            margin: 10px 0; /* Komen: Jarak lebih kecil */
+            color: var(--text-subtle);
+        }
+        
+        #certificate-template .cert-name {
+            font-size: 3em; /* Komen: DIKURANGI DARI 3.5em KE 3em */
+            margin: 25px 0; /* Komen: Jarak lebih kecil */
+            color: var(--color-cursor);
+            font-weight: 700;
+            border-bottom: 4px solid var(--accent-1); /* Komen: Border lebih tipis */
+            padding-bottom: 5px;
+        }
+        
+        #certificate-template .cert-result {
+            font-size: 1.7em; /* Komen: DIKURANGI DARI 2em KE 1.7em (Hasil Utama WPM & Akurasi) */
+            margin-top: 20px;
+            color: var(--text-main);
+        }
+        
+        #certificate-template .cert-result-value {
+            font-weight: 700;
+            color: var(--accent-1);
+            font-size: 1.2em; /* Komen: DIKURANGI DARI 1.5em KE 1.2em */
+            margin-left: 10px;
+        }
+        
+        /* Komen: Gaya baru untuk detail tambahan (Waktu & Kesalahan) yang disederhanakan */
+        #certificate-template .cert-details {
+             font-size: 1.1em; 
+             margin-top: 15px; 
+             line-height: 1.6;
+             color: var(--text-subtle);
+        }
+
+        #certificate-template .cert-footer {
+            margin-top: 40px; /* Komen: DIKURANGI DARI 50px KE 40px */
+            font-size: 1em; /* Komen: DIKURANGI DARI 1.2em KE 1em */
+            color: var(--text-subtle);
+        }
+        
+        /* ================================================= */
+        /* === Media Queries untuk responsivitas === */
+        /* ================================================= */
+        @media (max-width: 650px) { 
+            .container {
+                padding: 15px;
+                max-width: 98%;
+                gap: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            .stat-item {
+                min-width: unset;
+            }
+            .quote-container {
+                font-size: 0.9em;
+                padding: 15px;
+                min-height: 100px;
+            }
+            /* Komen: Tombol Aksi Full Width di layar kecil */
+            .action-buttons {
+                justify-content: center;
+                gap: 8px;
+            }
+            .action-button {
+                flex-grow: 1; 
+                padding: 0 10px;
+                font-size: 0.8em;
+                height: 35px;
+            }
+            .result-content {
+                padding: 20px;
+            }
+            .final-stat {
+                font-size: 1em;
+                margin: 8px 0;
+            }
+            .final-stat .stat-value {
+                font-size: 1.4em;
+            }
+            .final-action-buttons {
+                flex-direction: column;
+            }
+            .restart-btn, #download-cert-btn {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>TeweType Fast! <i class="fas fa-keyboard"></i></h1>
+
+        <div class="stats">
+            <div class="stat-item">WPM Bersih: <span id="wpm">0</span></div> 
+            
+            <div class="stat-item">
+                Waktu (Detik): 
+                <div class="time-control-group">
+                    <button class="time-select-btn" data-time="15" data-original-text="15">15</button>
+                    <button class="time-select-btn" data-time="30" data-original-text="30">30</button>
+                    <button class="time-select-btn active" data-time="60" data-original-text="60">60</button>
+                    <button class="time-select-btn" data-time="120" data-original-text="120">120</button>
+                </div>
+            </div>
+
+            <div class="stat-item">Kesalahan: <span id="errors">0</span></div>
+        </div>
+
+        <div class="quote-container" id="quote-container">
+            </div>
+
+        <textarea 
+            class="input-area" 
+            id="input-area" 
+            placeholder="Mulai mengetik di sini..."
+            autofocus
+            tabindex="0"
+            maxlength="1000"
+            wrap="off"
+        ></textarea>
+        
+        <div class="custom-input-area">
+            <textarea id="custom-text-input" placeholder="Masukkan kalimat kustom Anda di sini..."></textarea>
+            
+            <div class="action-buttons">
+                <button id="load-custom-btn" class="action-button"><i class="fas fa-file-import"></i> Muat Kustom</button>
+                
+                <button id="next-quote-btn" class="action-button" title="Ganti Teks (Next)"><i class="fas fa-redo-alt"></i> Ganti Teks</button>
+                
+                <button id="fullscreen-btn" class="action-button" title="Layar Penuh"><i class="fas fa-expand"></i> Layar Penuh</button>
+            </div>
+            
+        </div>
+        
+        <div class="result-overlay" id="result-overlay">
+            <div class="result-content">
+                <h2>Hasil Tes Mengetik Anda</h2>
+                
+                <div id="name-input-group">
+                    <label for="name-input">Masukkan Nama Anda untuk Sertifikat:</label>
+                    <input type="text" id="name-input" placeholder="Nama Lengkap">
+                </div>
+                
+                <div class="final-stat">WPM Bersih Akhir: <span class="stat-value" id="final-wpm">0</span></div>
+                
+                <div class="final-stat">
+                    Akurasi: <span class="stat-value" id="final-accuracy">0</span><span class="stat-detail">%</span>
+                </div>
+                
+                <div class="final-stat">
+                    Waktu Terpakai: 
+                    <span class="stat-value" id="final-time-used-value">0</span>
+                    <span class="stat-detail">detik dari <span id="final-max-time">60</span> Detik</span>
+                </div>
+                
+                <div class="final-stat">
+                    Total Kesalahan: 
+                    <span class="stat-value" id="final-errors-value">0</span>
+                    <span class="stat-detail">dari <span id="final-total-typed">0</span> Huruf</span>
+                </div>
+                
+                <div class="final-action-buttons">
+                    <button id="restart-btn" class="restart-btn"><i class="fas fa-sync-alt"></i> Coba Lagi!</button>
+                    <button id="download-cert-btn"><i class="fas fa-medal"></i> Unduh Sertifikat</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="certificate-template">
+            <h3>SERTIFIKAT KECEPATAN MENGETIK</h3>
+            <div class="cert-number-display" id="cert-number-placeholder">TEWETECH-XXXXX</div> 
+            
+            <p>Dengan bangga diberikan kepada:</p>
+            <div class="cert-name" id="cert-name-placeholder">Nama Pengguna</div>
+            <p>Atas pencapaian hasil fantastis dalam Tes Mengetik TeweType Fast!</p>
+            
+            <div class="cert-result">
+                WPM Bersih: <span class="cert-result-value" id="cert-wpm">0</span> 
+                | Akurasi: <span class="cert-result-value" id="cert-accuracy">0%</span>
+            </div>
+            
+            <div class="cert-details">
+                <p>Waktu Terpakai: <span class="cert-result-value" id="cert-time-used">0</span> Detik (Max: <span id="cert-max-time">60</span> Detik)</p>
+                <p>Total Kesalahan: <span class="cert-result-value" id="cert-errors">0</span> dari <span id="cert-total-typed">0</span> Huruf Diketik</p>
+            </div>
+            
+            <div class="cert-footer">
+                Resmi diberikan pada tanggal <span id="cert-date"></span><br>
+                tewetype.netlify.app | Since &copy; 2025
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // JAVASCRIPT LOGIC - Logika Permainan
+
+        // Komen: Array berisi beberapa kutipan/teks acak dalam Bahasa Indonesia
+       const QUOTES = [
+    // Kutipan Awal dan Tambahan Sebelumnya
+    "Programmer adalah seseorang yang suka kopi dan mengubah masalah menjadi baris kode yang elegan.",
+    "Kecepatan mengetik adalah keterampilan penting bagi setiap pengguna komputer, terutama para pengembang.",
+    "Cobalah untuk tidak hanya cepat, tetapi juga akurat. Akurasi adalah kunci untuk efisiensi yang lebih baik.",
+    "Dunia digital terus bergerak, dan kemampuan Anda untuk berinteraksi dengannya juga harus berkembang pesat.",
+    "Semangat! Setiap huruf yang Anda ketik membawa Anda selangkah lebih dekat menuju penguasaan keyboard.",
+    "JavaScript membuat website menjadi hidup, dan Anda membuat kode JavaScript itu hidup!",
+    "HTML menyediakan struktur, CSS memberikan gaya, dan JavaScript memberikan fungsi interaktif.",
+    "Latihan yang konsisten akan selalu menghasilkan peningkatan yang signifikan dari waktu ke waktu.",
+    "Game ini dirancang untuk menantang batas batas kecepatan dan keakuratan pengetikan Anda.",
+    "Inovasi adalah kemampuan untuk melihat perubahan sebagai peluang, bukan sebagai ancaman.",
+    "Jangan takut dengan bug; mereka hanyalah teka-teki kecil yang menunggu untuk dipecahkan.",
+    "Berpikir sebelum mengetik akan menghemat banyak waktu untuk proses debugging nanti.",
+    "Setiap baris kode adalah kesempatan untuk membuat sesuatu yang indah dan berfungsi.",
+    "Teknologi bergerak sangat cepat, jadi kita harus selalu siap untuk terus belajar hal baru.",
+    "Kualitas kode lebih penting daripada kuantitas. Buatlah kode yang mudah dipahami.",
+    "Satu langkah kecil yang dikerjakan setiap hari lebih baik daripada seribu rencana besar.",
+    "Masa depan diciptakan oleh apa yang Anda kerjakan hari ini, bukan besok.",
+    "Kegagalan hanyalah kesempatan untuk memulai lagi dengan lebih cerdas dan lebih baik.",
+    "Jaringan adalah kekuatan, tetapi konten adalah rajanya di dunia digital ini.",
+    "Alon-alon waton kelakon, nanging yen iso cepet, luwih apik maneh.",
+    "Ojo lali ngguyu, sanajan error kabeh. Semangatmu ora oleh luntur!",
+    "Akeh maca, akeh ngerti. Akeh ngetik, akeh trampil.",
+    "Sopo temen bakal tinemu. Tekun latihan, bakal cepet ngetike.",
+    "Luwih becik duwe skill siji nanging ahli, daripada akeh nanging ora karuan.",
+    "Dadi wong kuwi kudu pinter, nanging luwih pinter yen gelem sinau terus.",
+    "Urip iku koyo update software, kudu tetep maju lan luwih apik.",
+    "Ojo dadi wong sing gampang nyerah, ndak bakal sukses coding-mu.",
+    "The journey of a thousand miles begins with a single correct keystroke.",
+    "Code is like humor. When you have to explain it, it's bad.",
+    "Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows where you live.",
+    "Debugging is like being the detective in a crime movie where you are also the murderer.",
+    "Practice makes perfect, but consistent typing practice makes perfect coders.",
+    "Don't optimize for speed; optimize for clarity and then speed will follow naturally.",
+    "Keep your focus sharp, your fingers fast, and your code clean.",
+    "A good developer is not defined by the language they know, but by their problem-solving ability.",
+    "Mastering the keyboard is the first step to mastering the digital world.",
+    "Technology is nothing. What's important is that you have a faith in people, that they're basically good and smart, and if you give them tools, they'll do wonderful things with them.",
+    "The best way to predict the future is to create it.",
+    "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work.",
+    "Failure is simply the opportunity to begin again, this time more intelligently.",
+    "Jangan hanya menulis kode yang bisa dimengerti oleh komputer, tetapi juga oleh manusia.",
+    "Setiap tantangan coding adalah kesempatan untuk meningkatkan diri, bukan hambatan.",
+    "Kemampuan terbaik seorang developer adalah belajar dengan cepat.",
+    "Konsistensi adalah mata uang kesuksesan dalam pengembangan perangkat lunak.",
+    "Kunci untuk debugging yang sukses adalah berpikir seperti bug itu sendiri.",
+    "Dalam dunia kode, kesederhanaan adalah bentuk kecanggihan yang paling tinggi.",
+    "Belajarlah dari error Anda; mereka adalah guru terbaik Anda.",
+    "Program yang paling elegan adalah program yang berfungsi dengan benar dan mudah dipahami.",
+    "Jangan pernah berhenti bertanya 'mengapa' — rasa ingin tahu mendorong inovasi.",
+    "Tuliskan komentar sebagai ucapan terima kasih untuk diri Anda di masa depan.",
+    "Percayalah pada prosesnya. Kemajuan kecil hari ini adalah keahlian besar besok.",
+    "Kecepatan datang dari memori otot, dan akurasi datang dari fokus pikiran.",
+    "Senjata rahasia seorang developer yang hebat adalah dokumentasi yang baik.",
+    "Jika Anda tidak mau berbuat lebih, Anda tidak akan pernah mendapatkan lebih.",
+    "Pengembangan adalah maraton, bukan sprint. Jaga ritme dan jangan menyerah.",
+    "Sistem terbaik adalah yang dibangun dengan kolaborasi dan berbagi pengetahuan.",
+    "Tantangan terbesar dalam hidup adalah menjadi dirimu yang terbaik.",
+    "Apapun yang Anda kerjakan, kerjakan dengan hati. Tidak ada kegagalan, hanya ada hasil.",
+    "Ojo lali refresh pikiran. Bug ora bakal ilang nek sampeyan stress terus.",
+    "Ngopi dhisik, ben coding-mu lancar jaya!",
+    "The quieter you become, the more you are able to hear, especially the silent screams of your compiler.",
+    "Good code is its own best documentation.",
+    "There are only two hard things in computer science: cache invalidation and naming things.",
+    "Simplicity is the soul of efficiency.",
+    "Measuring programming progress by lines of code is like measuring aircraft building progress by weight.",
+    "It works on my machine is a myth; strive for universal execution.",
+    "Code less, do more.",
+    "The world is run by software, and you are the one writing it.",
+
+    // Tambahan Kutipan Baru
+    "Fokuskan pada solusi, bukan pada masalah. Itu yang dilakukan oleh para inovator.",
+    "Satu jam latihan terfokus lebih berharga daripada sehari kerja yang teralihkan.",
+    "Mengetik dengan cepat adalah dasar, tetapi berpikir dengan cepat adalah kekuatannya.",
+    "Kuasai alat Anda; keyboard adalah kuas Anda, dan kode adalah kanvas Anda.",
+    "Setiap pembaruan adalah kesempatan untuk membuat pengalaman pengguna menjadi lebih baik.",
+    "Jangan takut untuk memulai dari awal; itu berarti Anda memiliki pemahaman yang lebih baik sekarang.",
+    "Jadilah pembelajar seumur hidup. Di dunia teknologi, stagnasi adalah kemunduran.",
+    "Kopi dan kode adalah pasangan sempurna. Keduanya mendorong kreativitas dan fokus.",
+    "Ketika Anda menemukan bug, anggap itu sebagai undangan untuk meningkatkan desain Anda.",
+    "Kolaborasi membuat kode yang baik menjadi hebat. Jangan pernah bekerja sendirian.",
+    "Kecepatan bukan segalanya. Keandalan adalah raja, terutama di dalam kode.",
+    "Ketikkan apa yang Anda maksud, dan maksudkan apa yang Anda ketikkan.",
+    "Jangan pernah meremehkan kekuatan istirahat singkat untuk menjernihkan pikiran.",
+    "Ubah kemarahan terhadap bug menjadi motivasi untuk memecahkan teka-teki.",
+    "Elegan bukan tentang kesempurnaan, tetapi tentang efisiensi yang indah.",
+    "Pilihan teknologi hari ini menentukan batas kemampuan Anda di masa depan.",
+    "The best error message is the one that never shows up.",
+    "Write code that you can read three months later.",
+    "A spec is never finished until the software is running.",
+    "Perfection is achieved not when there is nothing more to add, but rather when there is nothing more to take away.",
+    "The only way to do great work is to love what you do."
+];
+
+        // Komen: Mendapatkan elemen-elemen DOM
+        const quoteContainer = document.getElementById('quote-container'); 
+        const inputArea = document.getElementById('input-area');           
+        const wpmDisplay = document.getElementById('wpm');                 
+        const errorsDisplay = document.getElementById('errors');           
+        const resultOverlay = document.getElementById('result-overlay');   
+        const restartBtn = document.getElementById('restart-btn');         
+        const customTextInput = document.getElementById('custom-text-input'); 
+        const loadCustomBtn = document.getElementById('load-custom-btn'); 
+        const timeButtons = document.querySelectorAll('.time-select-btn'); 
+        const nextQuoteBtn = document.getElementById('next-quote-btn'); 
+        const fullscreenBtn = document.getElementById('fullscreen-btn'); 
+        const downloadCertBtn = document.getElementById('download-cert-btn'); 
+        const nameInput = document.getElementById('name-input'); 
+
+        // Komen: Elemen hasil akhir
+        const finalWpmDisplay = document.getElementById('final-wpm');
+        const finalTimeUsedValueDisplay = document.getElementById('final-time-used-value');
+        const finalMaxTimeDisplay = document.getElementById('final-max-time');
+        const finalAccuracyDisplay = document.getElementById('final-accuracy');
+        const finalErrorsValueDisplay = document.getElementById('final-errors-value');
+        const finalTotalTypedDisplay = document.getElementById('final-total-typed');
+        
+        // Komen: Variabel state game
+        let currentQuote = "";       
+        let characterSpans = [];     
+        let errors = 0;              
+        let correctCharacters = 0; 
+        let timer;                   
+        let MAX_TIME;                
+        let intervalId;              
+        let startTime;               
+        let totalTypedCharacters = 0;
+        let isGameRunning = false;   
+        let activeTimeButton = document.querySelector('.time-select-btn.active'); 
+        
+        // --- FUNGSI UTAMA GAME ---
+
+        /**
+         * Komen: Mengambil kutipan acak dari array QUOTES.
+         */
+        function getRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * QUOTES.length);
+            return QUOTES[randomIndex];
+        }
+
+        /**
+         * Komen: Mengisi area teks dengan kutipan yang diberikan dan menginisialisasi span karakter.
+         */
+        function renderQuote(quote) {
+            quoteContainer.innerHTML = '';
+            characterSpans = []; 
+
+            // Komen: Memisahkan kutipan menjadi karakter dan membungkusnya dalam elemen span
+            quote.split('').forEach(char => {
+                const charSpan = document.createElement('span');
+                charSpan.innerText = char;
+                charSpan.classList.add('word-char'); 
+                quoteContainer.appendChild(charSpan);
+                characterSpans.push(charSpan); 
+            });
+
+            // Komen: Menetapkan kursor awal ('active') pada karakter pertama
+            if (characterSpans.length > 0) {
+                 characterSpans[0].classList.add('active');
+                 quoteContainer.scrollTop = 0; 
+            }
+        }
+        
+        /**
+         * Komen: Memuat kutipan dari area input kustom pengguna.
+         */
+        function loadCustomQuote() {
+            const customText = customTextInput.value.trim();
+            
+            // Komen: Validasi panjang teks kustom
+            if (customText.length > 5 && customText.length < 1000) {
+                currentQuote = customText;
+                startGame(false); // Komen: Mulai ulang game, JANGAN ambil kutipan acak baru
+                
+                // Komen: Umpan balik visual pada input kustom
+                customTextInput.style.border = '1px solid var(--color-cursor)';
+                customTextInput.value = ''; 
+                setTimeout(() => {
+                    customTextInput.style.border = '1px solid var(--border-color)';
+                }, 500);
+
+            } else {
+                alert("Mohon masukkan kalimat kustom dengan panjang antara 6 hingga 1000 karakter.");
+                customTextInput.focus();
+            }
+        }
+
+
+        /**
+         * Komen: Memulai atau mereset game ke kondisi awal.
+         */
+        function startGame(getNewRandomQuote = true, newTime = null) {
+            stopTimer(); // Komen: Hentikan timer yang mungkin sedang berjalan
+            
+            // Komen: Atur ulang tampilan tombol waktu ke nilai aslinya
+            timeButtons.forEach(btn => {
+                 btn.innerText = btn.dataset.originalText;
+                 btn.classList.remove('counting'); 
+                 btn.style.opacity = '1'; 
+                 btn.style.cursor = 'pointer'; 
+            });
+
+            // Komen: Logika pengaturan MAX_TIME dan Tombol Aktif
+            if (newTime !== null) {
+                MAX_TIME = newTime;
+                activeTimeButton = document.querySelector(`.time-select-btn[data-time="${newTime}"]`);
+                timeButtons.forEach(btn => btn.classList.remove('active'));
+                if (activeTimeButton) {
+                    activeTimeButton.classList.add('active');
+                }
+            } else if (!activeTimeButton) {
+                 // Komen: Inisialisasi default jika belum ada yang aktif
+                 activeTimeButton = document.querySelector('.time-select-btn[data-time="60"]');
+            }
+            
+            // Komen: Set MAX_TIME dari tombol aktif saat ini
+            if (activeTimeButton) {
+                 MAX_TIME = parseInt(activeTimeButton.dataset.time, 10);
+            }
+            
+            // Komen: Mengatur ulang variabel state
+            errors = 0;
+            correctCharacters = 0; // Reset
+            timer = MAX_TIME; 
+            totalTypedCharacters = 0;
+            isGameRunning = false;
+            
+            // Komen: Membersihkan input pengetikan utama dan memastikan fokus
+            inputArea.value = '';
+            inputArea.focus(); 
+
+            // Komen: Memperbarui tampilan statistik
+            errorsDisplay.innerText = errors;
+            wpmDisplay.innerText = 0;
+            
+            // Komen: LOGIKA PENGAMBILAN KUTIPAN BARU
+            if (getNewRandomQuote) {
+                currentQuote = getRandomQuote();
+                customTextInput.value = ''; // Komen: Kosongkan input kustom
+            } 
+
+            // Komen: Merender kutipan saat ini
+            renderQuote(currentQuote);
+            
+            // Komen: Menyembunyikan overlay hasil
+            resultOverlay.style.display = 'none';
+        }
+
+
+        /**
+         * Komen: Memulai penghitung waktu (timer).
+         */
+        function startTimer() {
+            if (isGameRunning) return; // Komen: Jangan mulai jika sudah berjalan
+
+            startTime = new Date().getTime(); // Komen: Simpan waktu mulai
+            isGameRunning = true;
+            
+            // Komen: Redupkan tombol lain dan tambahkan kelas 'counting' ke tombol aktif
+            timeButtons.forEach(btn => {
+                if (btn !== activeTimeButton) {
+                    btn.style.opacity = '0.5'; 
+                    btn.style.cursor = 'default'; // Komen: Nonaktifkan klik pada tombol lain
+                }
+            });
+            activeTimeButton.classList.add('counting');
+
+            // Komen: Interval per detik
+            intervalId = setInterval(() => {
+                timer--; 
+                
+                // Komen: Update teks hitung mundur di tombol aktif
+                activeTimeButton.innerText = timer; 
+
+                // Komen: Menghitung WPM Bersih secara real-time
+                updateWPM();
+
+                // Komen: Jika waktu habis, akhiri game
+                if (timer <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        /**
+         * Komen: Menghentikan interval timer yang sedang berjalan.
+         */
+        function stopTimer() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+                isGameRunning = false;
+                
+                // Komen: Hapus kelas 'counting' dan kembalikan opacity tombol
+                if (activeTimeButton) activeTimeButton.classList.remove('counting');
+                timeButtons.forEach(btn => {
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                });
+            }
+        }
+
+        /**
+         * Komen: Mengupdate tampilan WPM Bersih (Net WPM) secara real-time.
+         */
+        function updateWPM() {
+            const typedValue = inputArea.value;
+            let currentCorrectCount = 0;
+            let currentErrors = 0;
+
+            // Komen: Hitung ulang karakter benar dan salah
+            for (let i = 0; i < typedValue.length; i++) {
+                if (i < currentQuote.length && typedValue[i] === currentQuote[i]) {
+                    currentCorrectCount++;
+                } else {
+                    currentErrors++;
+                }
+            }
+
+            correctCharacters = currentCorrectCount; // Simpan karakter benar
+            errors = currentErrors; // Simpan kesalahan
+
+            const elapsedSeconds = (new Date().getTime() - startTime) / 1000;
+            
+            if (elapsedSeconds <= 0 || !isGameRunning) {
+                wpmDisplay.innerText = 0;
+                return;
+            }
+
+            // Komen: Menghitung WPM Bersih: (Karakter Benar / 5 - Kesalahan) / (Waktu terpakai dalam menit)
+            const minutesUsed = elapsedSeconds / 60;
+            const netWords = (correctCharacters / 5) - errors; 
+            const netWPM = Math.round(netWords / minutesUsed);
+
+            wpmDisplay.innerText = netWPM >= 0 ? netWPM : 0;
+            errorsDisplay.innerText = errors;
+        }
+
+        /**
+         * Komen: Logika utama saat input diketik oleh pengguna (Event 'input').
+         */
+        function handleInput() {
+            // Komen: Jika game belum dimulai, mulai timer
+            if (!isGameRunning) {
+                startTimer();
+            }
+            
+            const typedValue = inputArea.value;
+            
+            totalTypedCharacters = typedValue.length;
+
+            // Komen: Iterasi melalui setiap karakter untuk validasi dan penandaan
+            for (let i = 0; i < currentQuote.length; i++) {
+                const targetChar = characterSpans[i];
+                const typedChar = typedValue[i]; 
+
+                // Komen: Hapus semua kelas status sebelumnya
+                targetChar.classList.remove('correct', 'wrong', 'active');
+                targetChar.style.backgroundColor = 'transparent'; 
+
+                if (i < typedValue.length) {
+                    // Komen: Karakter telah diketik
+                    if (typedChar === currentQuote[i]) {
+                        targetChar.classList.add('correct');
+                    } else {
+                        targetChar.classList.add('wrong');
+                    }
+                } 
+            }
+            
+            // Komen: Update kursor ('active') pada karakter selanjutnya
+            const currentPosition = typedValue.length;
+
+            if (currentPosition < currentQuote.length) {
+                const nextChar = characterSpans[currentPosition];
+                nextChar.classList.add('active');
+
+                // Komen: Logika Auto-scroll
+                const containerRect = quoteContainer.getBoundingClientRect();
+                const nextCharRect = nextChar.getBoundingClientRect();
+
+                // Komen: Scroll ke bawah JAUH LEBIH AWAL (buffer 90px)
+                if (nextCharRect.bottom > containerRect.bottom - 90) { 
+                    quoteContainer.scrollTop += (nextCharRect.bottom - containerRect.bottom) + 15;
+                }
+            } else {
+                // Komen: Jika sudah selesai mengetik, hapus 'active'
+                if (currentQuote.length > 0) {
+                    characterSpans[currentQuote.length - 1].classList.remove('active');
+                }
+            }
+
+            // Komen: Update WPM (termasuk menghitung kesalahan)
+            updateWPM(); 
+
+            // Komen: Cek apakah teks sudah selesai diketik
+            if (typedValue.length === currentQuote.length) {
+                endGame();
+            }
+        }
+
+        /**
+         * Komen: Menangani tombol khusus (Panah, Enter).
+         */
+        function handleKeyDown(e) {
+            // Komen: Mencegah navigasi kursor pada input yang tersembunyi
+            if (e.key.startsWith('Arrow')) {
+                e.preventDefault();
+                return;
+            }
+        }
+
+
+        /**
+         * Komen: Mengakhiri permainan dan menampilkan hasil.
+         */
+        function endGame() {
+            stopTimer(); // Komen: Hentikan timer
+
+            // Komen: Hapus kursor aktif dari semua karakter
+            characterSpans.forEach(span => span.classList.remove('active'));
+            
+            // Komen: Pastikan tombol aktif menampilkan kembali nilai aslinya
+            if (activeTimeButton) activeTimeButton.innerText = activeTimeButton.dataset.originalText;
+            
+            const typedValue = inputArea.value;
+            
+            // Komen: Hitung waktu terpakai
+            let finalElapsedSeconds;
+            
+            if (typedValue.length === currentQuote.length && startTime) {
+                 // Komen: Jika selesai karena mengetik penuh: hitung waktu dari timestamp
+                 finalElapsedSeconds = Math.ceil((new Date().getTime() - startTime) / 1000);
+            } else {
+                // Komen: Jika selesai karena waktu habis atau Enter: gunakan waktu yang telah berlalu
+                finalElapsedSeconds = MAX_TIME - timer; 
+            }
+            
+            // Komen: Waktu terpakai, minimal 1 detik untuk perhitungan
+            const timeUsed = finalElapsedSeconds > 0 ? finalElapsedSeconds : 1; 
+            
+            // Komen: Update WPM/Errors terakhir
+            updateWPM();
+            
+            // Komen: Menghitung WPM Bersih Akhir
+            const minutesUsed = timeUsed / 60;
+            const netWords = (correctCharacters / 5) - errors; 
+            const finalNetWPM = Math.round(netWords / minutesUsed);
+
+            // Komen: Akurasi: Karakter Benar / Karakter Diketik
+            const charactersConsidered = typedValue.length; 
+            let accuracy = 0;
+            if (charactersConsidered > 0) {
+                accuracy = Math.round((correctCharacters / charactersConsidered) * 100);
+            }
+            
+            // Komen: Memperbarui tampilan hasil akhir di overlay
+            finalWpmDisplay.innerText = finalNetWPM >= 0 ? finalNetWPM : 0;
+            finalTimeUsedValueDisplay.innerText = timeUsed; 
+            finalMaxTimeDisplay.innerText = MAX_TIME; 
+            finalAccuracyDisplay.innerText = accuracy; 
+            finalErrorsValueDisplay.innerText = errors; 
+            finalTotalTypedDisplay.innerText = charactersConsidered; 
+            
+            // Komen: Menampilkan overlay hasil
+            resultOverlay.style.display = 'flex';
+            nameInput.focus(); // Komen: Arahkan fokus ke input nama
+        }
+        
+        // --- FUNGSI SERTIFIKAT FIX ---
+
+        /**
+         * Komen: Mengisi data ke template sertifikat dan mengunduhnya sebagai PNG.
+         */
+        function downloadCertificate() {
+            const name = nameInput.value.trim() || "Pengguna Anonim"; // Komen: Ambil nama atau default
+            
+            // Komen: Ambil data hasil akhir dari elemen display
+            const finalWPM = finalWpmDisplay.innerText;
+            const finalAccuracy = finalAccuracyDisplay.innerText;
+            const timeUsed = finalTimeUsedValueDisplay.innerText;
+            const maxTime = finalMaxTimeDisplay.innerText;
+            const errorsValue = finalErrorsValueDisplay.innerText;
+            const totalTyped = finalTotalTypedDisplay.innerText;
+            
+            // Komen: Dapatkan tanggal dan waktu lengkap untuk Nomor Sertifikat
+            const now = new Date();
+            // Komen: Format YYYYMMDDHHMMSS sesuai permintaan
+            const timestamp = now.getFullYear().toString() + 
+                              (now.getMonth() + 1).toString().padStart(2, '0') + 
+                              now.getDate().toString().padStart(2, '0') + 
+                              now.getHours().toString().padStart(2, '0') + 
+                              now.getMinutes().toString().padStart(2, '0') + 
+                              now.getSeconds().toString().padStart(2, '0');
+                              
+            // Komen: Format Nomor Sertifikat: TEWETECH-TIMESTAMP (hanya sampai detik)
+            const certNumber = `No Sertifikat : Tewe Tech-${timestamp}-TeweType Fast!`;
+
+            // Komen: Mengisi Template Sertifikat
+            document.getElementById('cert-name-placeholder').innerText = name;
+            document.getElementById('cert-wpm').innerText = finalWPM;
+            document.getElementById('cert-accuracy').innerText = `${finalAccuracy}%`;
+            
+            // Komen: Mengisi Detail Waktu dan Kesalahan (disesuaikan dengan tata letak baru)
+            document.getElementById('cert-time-used').innerText = timeUsed;
+            document.getElementById('cert-max-time').innerText = maxTime;
+            document.getElementById('cert-errors').innerText = errorsValue;
+            document.getElementById('cert-total-typed').innerText = totalTyped;
+            
+            // Komen: Mengisi Nomor Sertifikat (Sesuai Permintaan)
+            document.getElementById('cert-number-placeholder').innerText = certNumber; 
+            
+            // Komen: Tanggal hari ini
+            document.getElementById('cert-date').innerText = now.toLocaleDateString('id-ID', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            const template = document.getElementById('certificate-template');
+            
+            // Komen: Atur opasitas menjadi 1 hanya untuk sesaat agar html2canvas dapat merender dengan benar
+            template.style.opacity = '1';
+
+            // Komen: Menggunakan html2canvas untuk mengubah template menjadi gambar
+            html2canvas(template, {
+                scale: 2, // Komen: Skala lebih tinggi untuk kualitas lebih baik
+                backgroundColor: null, // Komen: Gunakan null agar html2canvas menghormati background CSS yang ada
+                allowTaint: true,
+                useCORS: true
+            }).then(canvas => {
+                
+                // Komen: Setelah selesai, sembunyikan kembali template (opasitas 0)
+                template.style.opacity = '0';
+                
+                // Komen: Membuat link unduhan
+                const image = canvas.toDataURL("image/png");
+                const a = document.createElement('a');
+                a.href = image;
+                a.download = `Sertifikat_TeweType_Fast!_${name.replace(/ /g, '_')}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                alert("Sertifikat berhasil diunduh!");
+            }).catch(err => {
+                 // Komen: Pastikan template disembunyikan meskipun terjadi error
+                 template.style.opacity = '0'; 
+                 console.error("Gagal membuat sertifikat:", err);
+                 alert("Gagal membuat sertifikat. Coba lagi.");
+            });
+        }
+
+        // --- FUNGSI FULLSCREEN ---
+
+        /**
+         * Komen: Mengaktifkan atau menonaktifkan mode layar penuh.
+         */
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        /**
+         * Komen: Mengupdate ikon dan teks tombol Layar Penuh.
+         */
+        function updateFullscreenButton() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Keluar Layar Penuh';
+                fullscreenBtn.title = 'Keluar Layar Penuh';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> Layar Penuh';
+                fullscreenBtn.title = 'Layar Penuh';
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Komen: Event listener utama untuk memproses input teks.
+        inputArea.addEventListener('input', handleInput);
+
+        // Komen: Event listener untuk tombol khusus
+        inputArea.addEventListener('keydown', handleKeyDown);
+
+        // Komen: Event listener untuk tombol muat kustom
+        loadCustomBtn.addEventListener('click', loadCustomQuote);
+        
+        // Komen: Event listener untuk tombol Ganti Teks (Next)
+        nextQuoteBtn.addEventListener('click', () => {
+             startGame(true); // Muat kutipan acak baru dan mulai ulang
+        });
+        
+        // Komen: Event listener untuk tombol Layar Penuh
+        fullscreenBtn.addEventListener('click', toggleFullScreen);
+        
+        // Komen: Event listener untuk perubahan status layar penuh
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        
+        // Komen: Event listener untuk tombol 'Coba Lagi!' di hasil akhir 
+        restartBtn.addEventListener('click', () => {
+             startGame(true); // Komen: Mulai ulang dengan kutipan acak baru
+        });
+        
+        // Komen: Event listener untuk tombol Unduh Sertifikat
+        downloadCertBtn.addEventListener('click', downloadCertificate);
+        
+        // Komen: Event listener untuk setiap tombol waktu
+        timeButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (!isGameRunning) {
+                    timeButtons.forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    const newTime = parseInt(e.target.dataset.time, 10);
+                    activeTimeButton = e.target;
+                    
+                    startGame(false, newTime); 
+                }
+            });
+        });
+
+        // Komen: Tambahkan event listener untuk fokus ulang input saat quote container diklik
+        quoteContainer.addEventListener('click', () => {
+            inputArea.focus();
+        });
+        
+        // Komen: Inisialisasi: set MAX_TIME dari tombol default (60) dan mulai game
+        startGame(true); 
+        // Komen: Pastikan ikon fullscreen sudah benar saat pertama kali dimuat
+        updateFullscreenButton();
+
+    </script>
+</body>
+</html>
