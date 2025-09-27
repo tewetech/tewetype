@@ -227,7 +227,7 @@
             cursor: text; 
         }
 
-        /* Komen: Scrollbar untuk Quote Container - Dibiarkan sama */
+        /* Komen: Scrollbar untuk Quote Container - Dibiarkan sama dengan sebelumnya */
         .quote-container::-webkit-scrollbar {
             width: 8px;
         }
@@ -324,6 +324,19 @@
             margin-bottom: 10px;
             transition: border-color 0.3s;
             font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Komen: Gaya Scrollbar untuk Input Kustom (DISAMAKAN DENGAN .quote-container) */
+        #custom-text-input::-webkit-scrollbar {
+            width: 8px;
+        }
+        #custom-text-input::-webkit-scrollbar-thumb {
+            background-color: var(--accent-1);
+            border-radius: 4px;
+        }
+        #custom-text-input::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
         }
         
         /* Komen: Kontainer untuk tombol Muat Kustom, Next, dan Layar Penuh */
@@ -683,9 +696,9 @@
             <div class="action-buttons">
                 <button id="load-custom-btn" class="action-button"><i class="fas fa-file-import"></i> Muat Kustom</button>
                 
-                <button id="next-quote-btn" class="action-button" title="Ganti Teks (Next)"><i class="fas fa-redo-alt"></i> Ganti Teks</button>
+                <button id="next-quote-btn" class="action-button"><i class="fas fa-redo-alt"></i> Ganti Teks</button>
                 
-                <button id="fullscreen-btn" class="action-button" title="Layar Penuh"><i class="fas fa-expand"></i> Layar Penuh</button>
+                <button id="fullscreen-btn" class="action-button"><i class="fas fa-expand"></i> Layar Penuh</button>
             </div>
             
         </div>
@@ -937,8 +950,13 @@
                 }, 500);
 
             } else {
-                alert("Mohon masukkan kalimat kustom dengan panjang antara 6 hingga 1000 karakter.");
+                // Komen: Hapus notifikasi popup saat memasukkan kata < 6 atau > 1000
+                // alert("Mohon masukkan kalimat kustom dengan panjang antara 6 hingga 1000 karakter.");
+                customTextInput.style.border = '1px solid var(--color-wrong)'; // Komen: Berikan umpan balik visual
                 customTextInput.focus();
+                setTimeout(() => {
+                    customTextInput.style.border = '1px solid var(--border-color)';
+                }, 1000);
             }
         }
 
@@ -1228,6 +1246,7 @@
 
         /**
          * Komen: Mengisi data ke template sertifikat dan mengunduhnya sebagai PNG.
+         * Komen: Notifikasi popup saat menyimpan sertifikat DIHILANGKAN.
          */
         function downloadCertificate() {
             const name = nameInput.value.trim() || "Pengguna Anonim"; // Komen: Ambil nama atau default
@@ -1297,12 +1316,13 @@
                 a.click();
                 document.body.removeChild(a);
                 
-                alert("Sertifikat berhasil diunduh!");
+                // Komen: Menghilangkan notif popup saat menyimpan sertifikat
+                // alert("Sertifikat berhasil diunduh!"); 
             }).catch(err => {
                  // Komen: Pastikan template disembunyikan meskipun terjadi error
                  template.style.opacity = '0'; 
                  console.error("Gagal membuat sertifikat:", err);
-                 alert("Gagal membuat sertifikat. Coba lagi.");
+                 // alert("Gagal membuat sertifikat. Coba lagi."); // Komen: Menghilangkan notif popup error
             });
         }
 
@@ -1329,10 +1349,12 @@
         function updateFullscreenButton() {
             if (document.fullscreenElement) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Keluar Layar Penuh';
-                fullscreenBtn.title = 'Keluar Layar Penuh';
+                // Komen: Menghapus title/tooltip
+                // fullscreenBtn.title = 'Keluar Layar Penuh';
             } else {
                 fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> Layar Penuh';
-                fullscreenBtn.title = 'Layar Penuh';
+                // Komen: Menghapus title/tooltip
+                // fullscreenBtn.title = 'Layar Penuh';
             }
         }
 
