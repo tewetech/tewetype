@@ -295,7 +295,7 @@
         }
         
         /* ================================================= */
-        /* === Area Input Kustom & Tombol Aksi === */
+        /* === Area Input Kustom & Tombol Aksi (REVISI) === */
         /* ================================================= */
         .custom-input-area {
             margin-top: 10px; 
@@ -339,17 +339,17 @@
             border-radius: 4px;
         }
         
-        /* Komen: Kontainer untuk tombol Muat Kustom, Next, dan Layar Penuh */
+        /* Komen: Kontainer untuk tombol Aksi. Menggunakan wrap untuk responsivitas */
         .action-buttons {
             /* Komen: Mengatur tata letak horizontal dan sejajar di kanan */
             display: flex;
             justify-content: flex-end; 
             gap: 10px;
             margin-top: 10px;
-            flex-wrap: wrap; 
+            flex-wrap: wrap; /* Komen: Memastikan tombol akan turun baris jika lebar kurang */
         }
         
-        /* Komen: Gaya umum untuk semua tombol aksi (Muat Kustom, Next, Layar Penuh) */
+        /* Komen: Gaya umum untuk semua tombol aksi (Muat Kustom, Next, Layar Penuh, Putar Musik) */
         .action-button {
             /* Komen: Memastikan tombol memiliki ukuran yang konsisten */
             height: 40px; 
@@ -372,6 +372,13 @@
         .action-button:hover {
             background-color: var(--color-cursor); 
             color: var(--bg-primary); 
+        }
+        
+        /* Komen: Gaya khusus untuk tombol musik saat aktif */
+        .action-button.music-playing {
+            color: var(--bg-primary); 
+            background-color: var(--accent-1); 
+            border-color: var(--accent-1); 
         }
         
         /* ================================================= */
@@ -516,7 +523,7 @@
         }
 
         /* ============================================================================== */
-        /* === REVISI GAYA SERTIFIKAT AGAR SESUAI DENGAN GAMBAR LATAR BELAKANG BARU === */
+        /* === GAYA SERTIFIKAT (TIDAK BERUBAH DARI VERSI ASLI YANG DIKIRIM) === */
         /* ============================================================================== */
         #certificate-template {
             /* Komen: Template sertifikat disembunyikan dan diatur ukurannya untuk PNG */
@@ -610,7 +617,6 @@
         
         /* Komen: Gaya untuk footer (tanggal dan nama web) */
         #certificate-template .cert-footer {
-            /* Komen: REVISI: 'margin-top: auto' dihapus agar footer tidak mepet ke bawah */
             /* Komen: Jarak diatur dengan margin-top statis agar posisinya naik mendekati konten */
             margin-top: 45px; 
             font-size: 1em; 
@@ -618,7 +624,7 @@
         }
         
         /* ================================================= */
-        /* === Media Queries untuk responsivitas === */
+        /* === Media Queries untuk responsivitas (REVISI) === */
         /* ================================================= */
         @media (max-width: 650px) { 
             .container {
@@ -642,17 +648,26 @@
                 padding: 15px;
                 min-height: 100px;
             }
-            /* Komen: Tombol Aksi Full Width di layar kecil */
+            /* Komen: Tombol Aksi - Tetap menggunakan flex-wrap, disederhanakan */
             .action-buttons {
                 justify-content: center;
                 gap: 8px;
             }
+            /* Komen: Memastikan tombol memenuhi lebar yang ada (2 tombol per baris) */
             .action-button {
                 flex-grow: 1; 
+                flex-basis: calc(50% - 5px); /* Komen: 2 tombol per baris dengan gap 10px */
                 padding: 0 10px;
                 font-size: 0.8em;
                 height: 35px;
             }
+            /* Komen: Pastikan flex-basis tidak melebihi 100% saat hanya 1 tombol */
+            @media (max-width: 350px) {
+                .action-button {
+                    flex-basis: 100%; /* Komen: 1 tombol per baris di layar sangat kecil */
+                }
+            }
+
             .result-content {
                 padding: 20px;
             }
@@ -715,6 +730,8 @@
                 <button id="next-quote-btn" class="action-button"><i class="fas fa-redo-alt"></i> Ganti Teks</button>
                 
                 <button id="fullscreen-btn" class="action-button"><i class="fas fa-expand"></i> Layar Penuh</button>
+
+                <button id="toggle-music-btn" class="action-button"><i class="fas fa-music"></i> Putar Musik</button>
             </div>
             
         </div>
@@ -778,6 +795,11 @@
         </div>
 
     </div>
+    
+    <audio id="background-music" loop>
+        <source src="https://raw.githubusercontent.com/tewetech/tewetype/refs/heads/main/Merpati%20Tak%20Rela%20(Cover).mp3" type="audio/mp3">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
 
     <script>
         // JAVASCRIPT LOGIC - Logika Permainan
@@ -804,6 +826,9 @@
         const fullscreenBtn = document.getElementById('fullscreen-btn'); 
         const downloadCertBtn = document.getElementById('download-cert-btn'); 
         const nameInput = document.getElementById('name-input'); 
+        // Komen: Elemen baru untuk musik
+        const backgroundMusic = document.getElementById('background-music');
+        const toggleMusicBtn = document.getElementById('toggle-music-btn'); 
 
         // Komen: Elemen hasil akhir
         const finalWpmDisplay = document.getElementById('final-wpm');
@@ -826,7 +851,7 @@
         let isGameRunning = false;   
         let activeTimeButton = document.querySelector('.time-select-btn.active'); 
         
-        // --- FUNGSI UTAMA GAME ---
+        // --- FUNGSI UTAMA GAME (TIDAK BERUBAH) ---
 
         /**
          * Komen: Mengambil kutipan acak dari array QUOTES.
@@ -878,9 +903,8 @@
                 }, 500);
 
             } else {
-                // Komen: Hapus notifikasi popup saat memasukkan kata < 6 atau > 1000
-                // alert("Mohon masukkan kalimat kustom dengan panjang antara 6 hingga 1000 karakter.");
-                customTextInput.style.border = '1px solid var(--color-wrong)'; // Komen: Berikan umpan balik visual
+                // Komen: Berikan umpan balik visual untuk input tidak valid
+                customTextInput.style.border = '1px solid var(--color-wrong)'; 
                 customTextInput.focus();
                 setTimeout(() => {
                     customTextInput.style.border = '1px solid var(--border-color)';
@@ -1170,11 +1194,10 @@
             nameInput.focus(); // Komen: Arahkan fokus ke input nama
         }
         
-        // --- FUNGSI SERTIFIKAT FIX ---
+        // --- FUNGSI SERTIFIKAT FIX (TIDAK BERUBAH) ---
 
         /**
          * Komen: Mengisi data ke template sertifikat dan mengunduhnya sebagai PNG.
-         * Komen: Notifikasi popup saat menyimpan sertifikat DIHILANGKAN.
          */
         function downloadCertificate() {
             const name = nameInput.value.trim() || "Pengguna Anonim"; // Komen: Ambil nama atau default
@@ -1197,7 +1220,7 @@
                               now.getMinutes().toString().padStart(2, '0') + 
                               now.getSeconds().toString().padStart(2, '0');
                               
-            // Komen: Format Nomor Sertifikat: TEWETECH-TIMESTAMP (hanya sampai detik)
+            // Komen: Format Nomor Sertifikat: Tewe Tech-TIMESTAMP-TeweType Fast!
             const certNumber = `No Sertifikat : Tewe Tech-${timestamp}-TeweType Fast!`;
 
             // Komen: Mengisi Template Sertifikat
@@ -1205,13 +1228,13 @@
             document.getElementById('cert-wpm').innerText = finalWPM;
             document.getElementById('cert-accuracy').innerText = `${finalAccuracy}%`;
             
-            // Komen: Mengisi Detail Waktu dan Kesalahan (disesuaikan dengan tata letak baru)
+            // Komen: Mengisi Detail Waktu dan Kesalahan 
             document.getElementById('cert-time-used').innerText = timeUsed;
             document.getElementById('cert-max-time').innerText = maxTime;
             document.getElementById('cert-errors').innerText = errorsValue;
             document.getElementById('cert-total-typed').innerText = totalTyped;
             
-            // Komen: Mengisi Nomor Sertifikat (Sesuai Permintaan)
+            // Komen: Mengisi Nomor Sertifikat
             document.getElementById('cert-number-placeholder').innerText = certNumber; 
             
             // Komen: Tanggal hari ini
@@ -1227,7 +1250,7 @@
             // Komen: Menggunakan html2canvas untuk mengubah template menjadi gambar
             html2canvas(template, {
                 scale: 2, // Komen: Skala lebih tinggi untuk kualitas lebih baik
-                backgroundColor: null, // Komen: Gunakan null agar html2canvas menghormati background CSS yang ada
+                backgroundColor: null, 
                 allowTaint: true,
                 useCORS: true
             }).then(canvas => {
@@ -1244,17 +1267,14 @@
                 a.click();
                 document.body.removeChild(a);
                 
-                // Komen: Menghilangkan notif popup saat menyimpan sertifikat
-                // alert("Sertifikat berhasil diunduh!"); 
             }).catch(err => {
                  // Komen: Pastikan template disembunyikan meskipun terjadi error
                  template.style.opacity = '0'; 
                  console.error("Gagal membuat sertifikat:", err);
-                 // alert("Gagal membuat sertifikat. Coba lagi."); // Komen: Menghilangkan notif popup error
             });
         }
 
-        // --- FUNGSI FULLSCREEN ---
+        // --- FUNGSI FULLSCREEN (TIDAK BERUBAH) ---
 
         /**
          * Komen: Mengaktifkan atau menonaktifkan mode layar penuh.
@@ -1277,16 +1297,36 @@
         function updateFullscreenButton() {
             if (document.fullscreenElement) {
                 fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Keluar Layar Penuh';
-                // Komen: Menghapus title/tooltip
-                // fullscreenBtn.title = 'Keluar Layar Penuh';
             } else {
                 fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> Layar Penuh';
-                // Komen: Menghapus title/tooltip
-                // fullscreenBtn.title = 'Layar Penuh';
+            }
+        }
+        
+        // --- FUNGSI MUSIK (BARU) ---
+        
+        /**
+         * Komen: Memutar atau menghentikan musik latar.
+         */
+        function toggleMusic() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play().then(() => {
+                    // Komen: Tambahkan kelas visual saat musik diputar
+                    toggleMusicBtn.classList.add('music-playing');
+                    toggleMusicBtn.innerHTML = '<i class="fas fa-volume-up"></i> Hentikan Musik';
+                }).catch(error => {
+                    console.error("Gagal memutar musik:", error);
+                    // Komen: Terkadang play() gagal tanpa interaksi pengguna, tidak perlu alert
+                });
+            } else {
+                backgroundMusic.pause();
+                // Komen: Hapus kelas visual saat musik dihentikan
+                toggleMusicBtn.classList.remove('music-playing');
+                toggleMusicBtn.innerHTML = '<i class="fas fa-music"></i> Putar Musik';
             }
         }
 
-        // --- EVENT LISTENERS ---
+
+        // --- EVENT LISTENERS (DITAMBAH) ---
 
         // Komen: Event listener utama untuk memproses input teks.
         inputArea.addEventListener('input', handleInput);
@@ -1304,6 +1344,9 @@
         
         // Komen: Event listener untuk tombol Layar Penuh
         fullscreenBtn.addEventListener('click', toggleFullScreen);
+        
+        // Komen: Event listener BARU untuk tombol Putar Musik
+        toggleMusicBtn.addEventListener('click', toggleMusic);
         
         // Komen: Event listener untuk perubahan status layar penuh
         document.addEventListener('fullscreenchange', updateFullscreenButton);
